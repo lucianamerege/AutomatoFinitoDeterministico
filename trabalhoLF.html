@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>AFDs</title>
+    </head>
+    <body onload="desenhar();">
+        <div class="cabecalho">
+            <h1>Autômatos Finitos Determinísticos</h1>
+        </div>
+        <div class="corpo">
+            <h2>O que são?</h2>
+            <p>Autômatos Finitos Determinísticos (AFDs) são máquinas de estados finitas que aceitam ou rejeitam cadeias finitas de símbolos, chamadas de palavras. "Determinística" refere-se à unicidade do processamento. Para cada estado do autômato existe um arco de transição levando a um outro estado para cada símbolo aceito por ela. Isso significa que, em um dado estado, após a leitura de cada símbolo a máquina determinística transita para um único estado referente à aresta associada ao símbolo.</p>
+            
+            <h2>Quais são as suas características?</h2>
+            <p>Um Autômato Finito Determinístico A é uma 5-tuple (ou quíntupla), (Q, Σ, δ, q0, F) consistindo de:</p>
+            <ul>
+                <li>um conjunto finito de símbolos de entrada chamado Alfabeto (Σ)</li>
+                <li>um conjunto finito de estados (Q)</li>
+                <li>um estado inicial (q0 ∈ Q)</li>
+                <li>um conjunto de estados de aceitação/finais (F ⊆ Q)</li>
+                <li>uma função de transição (δ : Q × Σ → Q)</li>
+            </ul>
+
+            <h2>Como funcionam?</h2>
+            <p>Ao receber uma palavra w, composta por um número finito de caracteres pertencentes ao alfabeto Σ, a máquina de estados irá iniciar o processo de computação dessa palavra. Começando pelo estado inicial (q0 ∈ Q), ela irá ler cada caractere da esquerda para a direita e fazer uma transição para o estado seguinte, de acordo com a função de transição. Ao chegar no último caractere e fazer a última transição, o autômato deve estar em um dos estados finais para que a palavra seja aceita. Caso contrário, a máquina rejeita a palavra.</p>
+    
+        </div>
+        <div class="divisaoCinza">
+            <h2>Teste um autômato:</h2>
+            <p>Abaixo está a representação gráfica de um Autômato Finito Determinístico. Nele você poderá inserir uma palavra e envia-la para teste. Os estados irão se acender a medida que a palavra for lida, e no final você saberá se ela foi aceita ou não, e poderá tentar novamente.</p>
+            <h3>Características:</h3>
+            <ul>
+                <li>Alfabeto (Σ): {0,1}</li>
+                <li>Conjunto finito de estados (Q): {q1, q2, q3}</li>
+                <li>Estado inicial (q0 ∈ Q): q1</li>
+                <li>Conjunto de estados de aceitação/finais (F ⊆ Q): {q3}</li>
+                <li>Função de transição (δ : Q × Σ → Q) definida pela seguinte tabela de transição de estados:</li>
+            </ul>
+
+            <table>
+                <tr>
+                    <td> </td>
+                    <th> 0 </th>
+                    <th> 1 </th>
+                </tr>
+                <tr>
+                    <th> q1 </th>
+                    <td> q1 </td>
+                    <td> q2 </td>
+                </tr>
+                <tr>
+                    <th> q2 </th>
+                    <td> q3 </td>
+                    <td> q1 </td>
+                </tr>
+                <tr>
+                    <th> q3 </th>
+                    <td> q2 </td>
+                    <td> q3 </td>
+                </tr>
+                
+            </table>
+        </div>
+
+        <div class="linha">
+
+            <div style="width: 25vw;">
+                <form formname="palavraEnviada">
+                    <div style="display: flex; flex-direction: column; padding-top: 7vh;">
+                        <label for="palavra">Escreva a sua palavra:</label>
+                        <input type="text" name="palavra" id="palavra" disabled>
+                        <div style="display: flex; flex-direction:row">
+                            <input style="flex-grow: 1;" class="button" type="button" name="um" value="1" onclick="display('1')">
+                            <input style="flex-grow: 1;" class="button" type="button" name="zero" value="0" onclick="display('0')">
+                        </div>
+                        <button class="button" type="button" id="paraEnviar" onclick="primeiraPalavra()">Enviar</button>
+                        <button class="button" type="button" id="enviado" disabled>Tentar de novo</button>
+                        <button class="button" type="button" id="paraTentar" onclick="limparAutomato()">Tentar de novo</button>
+                    </div>
+                </form>     
+            </div>
+
+            <div style="width: 44vw;">
+                <canvas id="automato" width="600" height="300" style="border:1px solid #000000;"></canvas>
+            </div>
+
+            <div style="width: 25vw; padding-top: 7vh;">
+                <div id="palavraAceita"><p>Palavra aceita!</p><p>Estado final: q3 </p></div>
+                <div id="palavraRejeitada"><p>Palavra rejeitada.</p><p>Estado final: <span id="displayResultado"></span></p></div>    
+            </div>
+
+        </div>
+      
+        <p style="font-size: 12px;margin-left: 3vw;">Feito pela aluna Luciana Merege de Assis para o trabalho de produção de conteúdo na matéria Linguagens Formais do curso de Ciência da Computação da UFRJ. 27/08/2021</p>
+    </body>
+    <!--Quando ele terminar de escrever a palavra de 0s e 1s ele vai clicar no botao e isso vai pra funcao que pinta o proximo estado. Se chegar no final da palavra e estiver no estado final, gg-->
+    <script>
+
+        function display(value){
+            document.getElementById("palavra").value+=value;
+        }
+
+        var estadoAtual = "q0";
+        var estadoFinal="q3";
+        var posicao = 0;
+        var escrever = 10;
+
+        var canvas = document.getElementById('automato');
+        var ctx = canvas.getContext('2d');
+        ctx.font ='30px serif';
+
+        function desenhar(){
+
+            ctx.beginPath();
+            ctx.moveTo(20, 150);
+            ctx.lineTo(95, 150);//seta começo
+            ctx.lineTo(85, 145);
+            ctx.moveTo(85, 155);
+            ctx.lineTo(95, 150);//seta final
+
+            ctx.moveTo(195, 150);
+            ctx.arc(145, 150, 50, 0, Math.PI * 2, true); // Circulo externo q1
+            ctx.fillText('q1', 130, 155);
+            ctx.lineTo(270, 150);//seta começo
+            ctx.lineTo(260, 145);
+            ctx.moveTo(260, 155);
+            ctx.lineTo(270, 150);//seta final
+            ctx.fillText('1', 225, 175);
+
+            ctx.moveTo(370, 150);
+            ctx.arc(320, 150, 50, 0, Math.PI * 2, true); // Circulo externo q2
+            ctx.fillText('q2', 305, 155);
+            ctx.lineTo(445, 150);//seta começo
+            ctx.lineTo(435, 145);
+            ctx.moveTo(435, 155);
+            ctx.lineTo(445, 150);//seta final
+            ctx.fillText('0', 400, 175);
+
+            ctx.moveTo(545, 150);
+            ctx.arc(495, 150, 50, 0, Math.PI * 2, true); // Circulo externo q3
+            ctx.moveTo(535, 150);
+            ctx.arc(495, 150, 40, 0, Math.PI * 2, true);  // Circulo interno final
+            ctx.fillText('q3', 480, 155);
+
+
+            ctx.moveTo(110, 186);//seta do 0 no q1
+            ctx.arc(145, 206, 40, Math.PI * 7/6, Math.PI * 11/6, true);
+            ctx.lineTo(190, 196);
+            ctx.moveTo(180, 186);
+            ctx.lineTo(179, 201);
+            ctx.fillText('0', 138, 270);
+
+            ctx.moveTo(320, 100);//seta do 1 no q2
+            ctx.arc(232, 185, 120, Math.PI*7/4, Math.PI * 5/4, true);
+            ctx.lineTo(153, 88);
+            ctx.moveTo(148, 100);
+            ctx.lineTo(160, 95);
+            ctx.fillText('1', 225, 60);
+
+            ctx.moveTo(495, 100);//seta do 0 no q3
+            ctx.arc(407, 185, 120, Math.PI*7/4, Math.PI * 5/4, true);
+            ctx.lineTo(327, 88);
+            ctx.moveTo(322, 100);
+            ctx.lineTo(334, 96);
+            ctx.fillText('0', 400, 60);
+
+            ctx.moveTo(460, 186);//seta do 1 no q3
+            ctx.arc(495, 206, 40, Math.PI * 7/6, Math.PI * 11/6, true);
+            ctx.lineTo(530, 196);
+            ctx.moveTo(530, 186);
+            ctx.lineTo(537, 194);
+            ctx.fillText('1', 488, 270);
+
+            ctx.stroke();
+        }
+
+        function primeiraPalavra(){
+
+            var botao= document.getElementById("paraEnviar");
+            botao.style.display="none";
+            botao= document.getElementById("enviado");
+            botao.style.display="block";
+            
+            var palavra = document.getElementById("palavra").value;
+            var tamanho = palavra.length;
+            console.log(palavra);
+            console.log(tamanho);
+
+            if(estadoAtual=="q0"){
+                acenderEstado('q1', 130, 155);
+            }
+
+            console.log(posicao);
+
+            afd(palavra, tamanho);
+            
+        }
+
+        async function afd(palavra, tamanho){
+            for(i = 0; i<tamanho; i++){
+
+                await sleep(1500);
+
+                if(estadoAtual=="q1"){
+                    if(palavra.charAt(posicao)==0){
+                        escreverCaractere('0');
+                        posicao = posicao+1;
+                        acenderEstado('q1', 130, 155);
+                    }else{
+                        escreverCaractere('1');
+                        posicao = posicao+1;
+                        acenderEstado('q2', 305, 155);
+                    }
+                }
+
+                else if(estadoAtual=="q2"){
+                    if(palavra.charAt(posicao)==0){
+                        escreverCaractere('0');
+                        posicao = posicao+1;
+                        acenderEstado('q3', 480, 155);
+                    }else{
+                        escreverCaractere('1');
+                        posicao = posicao+1;
+                        acenderEstado('q1', 130, 155);
+                    }
+                }
+
+                else if(estadoAtual=="q3"){
+                    if(palavra.charAt(posicao)==0){
+                        escreverCaractere('0');
+                        posicao = posicao+1;
+                        acenderEstado('q2', 305, 155);
+                    }else{
+                        escreverCaractere('1');
+                        posicao = posicao+1;
+                        acenderEstado('q3', 480, 155);
+
+                    }
+                }
+            }
+
+            if(estadoAtual == estadoFinal){
+                var resultado= document.getElementById("palavraAceita");
+                resultado.style.display="block";
+                //fazer uma variavel booleana que esconde e mostra de novo um aviso dizendo que a palavra funcionou.
+            }else{
+                var resultado= document.getElementById("palavraRejeitada");
+                document.getElementById("displayResultado").innerHTML = estadoAtual;
+                resultado.style.display="block";
+            }
+
+            var botao= document.getElementById("enviado");
+            botao.style.display="none";
+            botao= document.getElementById("paraTentar");
+            botao.style.display="block";
+
+        }
+
+        function sleep(ms){
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        //fazer aparecer no topo esquerdo superior do canvas o caracter que está sendo lido. ter uma posicao inicial fixa a qual vai ser acrescentado o valorzinho para por o proximo caractere quantas vezes for necessario.
+
+        async function acenderEstado(estado, posicaoX, posicaoY){
+            estadoAtual=estado;
+            ctx.fillStyle="red";
+            ctx.fillText(estado, posicaoX, posicaoY);
+            await sleep(1000);
+            ctx.fillStyle="black";
+            ctx.fillText(estado, posicaoX, posicaoY);
+        }
+
+        function escreverCaractere(letra){
+            ctx.fillText(letra, escrever, 25);
+            escrever = escrever + 15;
+        }
+
+        function limparAutomato(){
+
+            var botao= document.getElementById("paraEnviar");
+            botao.style.display="block";
+            botao= document.getElementById("paraTentar");
+            botao.style.display="none";
+
+            //limpar o input
+            document.getElementById("palavra").value="";
+            //redefinindo as variáveis
+            estadoAtual = "q0";
+            estadoFinal="q3";
+            posicao = 0;
+            escrever = 10;
+            //escondendo o resultado
+            var resultado = document.getElementById("palavraAceita");
+            resultado.style.display="none";
+            resultado= document.getElementById("palavraRejeitada");
+            resultado.style.display="none";
+            //limpando a palavra do canvas
+            ctx.clearRect(0,0,600,25);
+        }
+
+    </script>
+    <style>
+        #palavraAceita, #palavraRejeitada, #enviado, #paraTentar{
+            display: none;
+        }
+        #paraEnviar{
+            display: block;
+        }
+
+        #palavraAceita, #palavraRejeitada{
+            font-size: 30px;
+        }
+
+        .divisaoCinza{
+            background-color: #f1f1f1dc;
+            padding: 2% 3vw;
+        }
+
+        input{
+            background-color: white;
+        }
+
+        .button {
+            background-color: #555;
+            border: none;
+            color: white;
+            padding: 8px 32px;
+            height: 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            margin: 1vh 2px 0vh;
+            cursor: pointer;
+        }
+
+        #enviado{
+            background-color: rgb(131, 131, 131);
+            cursor: wait;
+        }
+
+        body{
+            background-color: #ffffff;
+            margin: 0;
+        }
+        .corpo{
+            padding: 2% 3vw;
+        }
+
+        #palavra{
+            height:30px;
+        }
+
+        .cabecalho{
+            background-color: #555;
+            color: white;
+            height: 15vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 3vw;
+        }
+        canvas{
+            background-color: white;
+
+        }
+        h2{
+            margin: 0;
+        }
+        li{
+            overflow: visible !important;
+        }
+        table, th, td{
+            border: 1px solid black;
+            border-collapse: collapse;
+            background-color: #fafafa;
+        }
+        table{
+            margin-left: 2%;
+            margin-bottom: 2%;
+            
+        }
+        th, td{
+            height: 30px;
+            width:70px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .linha{
+            padding: 2% 3vw;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            text-align: center;
+            align-content: space-around;
+        }
+
+    </style>
+</html>
